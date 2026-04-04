@@ -40,6 +40,7 @@ def decide_action(objects):
     elif "cup" in objects:
         return "move_cup"
     return "idle"
+```
 
 ### Day 4-5: 仿真执行
 
