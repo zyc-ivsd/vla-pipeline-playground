@@ -79,22 +79,23 @@ python main.py --input video.mp4
 python detect.py --source test.jpg    # 检测
 python track.py --source test.mp4     # 跟踪
 python sim.py --action pick_bottle    # 仿真
+```
 
-关键学习收获
+### 关键学习收获
 工程实践：理解了如何将深度学习模型（YOLO）与传统跟踪算法（DeepSORT）结合
 系统思维：体验了感知-决策-执行闭环的延迟和耦合问题
 仿真基础：掌握了PyBullet的基本使用，理解物理仿真在机器人开发中的重要性
 性能优化：在无GPU环境下，通过降低分辨率和批处理优化推理速度
 局限性与未来探索
-当前局限：
+### 当前局限：
 决策模块使用简单规则，未引入LLM/VLM
 仅支持仿真环境，未接入真实机械臂
 3D感知部分仅完成基础点云处理，未实现完整的三维重建
-下一步想探索的：
+### 下一步想探索的：
 尝试将决策模块升级为轻量级VLM（如LLaVA）接入
 深入学习3D视觉，尝试用Open3D实现简单的物体位姿估计
 了解Sim-to-Real的基本方法，为后续接触真实机器人做准备
-参考资料
+### 参考资料
 YOLOv8官方文档
 PyBullet Quickstart Guide
 DeepSORT原始论文与实现
