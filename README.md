@@ -1,104 +1,244 @@
-# Mini Embodied Agent - A Learning Project
+# Embodied AI Demo: A Minimal Vision-to-Action Pipeline
 
-&gt; 一个用于学习具身智能基础的最小化实践项目。通过7天的动手实验，探索从视觉感知到动作执行的完整pipeline。
+> 一个面向具身智能入门实践的最小化项目：从视频中的目标检测与跟踪出发，生成简单动作指令，并在 PyBullet 中完成机械臂仿真执行。
 
-## 项目概述
+## 项目简介
 
-这个项目源于对具身智能（Embodied AI）的好奇心。我希望通过从零搭建一个简单的**Vision-Action Pipeline**，理解机器人如何从"看见"到"行动"的基本流程。
+这个项目的目标不是实现完整的机器人操作系统，而是搭建一条清晰、可运行、可解释的最小闭环：
 
-项目实现了最简化的四步闭环：
-1. **感知**：使用YOLOv8进行物体检测，DeepSORT完成多目标跟踪
-2. **决策**：基于规则的简单决策器（如检测到bottle则触发pick动作）
-3. **执行**：在PyBullet仿真环境中控制KUKA iiwa机械臂完成基础动作
-4. **验证**：通过仿真观察动作执行效果
+**视频输入 → 目标检测 → 目标跟踪 → 动作决策 → 仿真执行**
+
+项目目前已经完成以下部分：
+
+1. **视觉感知**：使用 YOLOv8 对视频帧中的目标进行检测。
+2. **时序关联**：使用 DeepSORT 对目标进行跨帧跟踪，并分配稳定 ID。
+3. **动作决策**：根据当前检测到的目标类别，用简单规则生成动作指令。
+4. **仿真执行**：在 PyBullet 中加载 KUKA iiwa 机械臂，并执行对应动作。
+
+目前的系统重点在于验证一条从“看见”到“执行”的基础 pipeline 是否能够顺利跑通，并为后续扩展到更复杂的具身智能任务打下工程基础。
+
+---
+
+## 当前系统流程
+
+```text
+Input Video
+   ↓
+YOLOv8 Detection
+   ↓
+DeepSORT Tracking
+   ↓
+Rule-Based Decision Module
+   ↓
+PyBullet Robot Execution
+```
+
+---
 
 ## 项目结构
-mini-embodied-agent/
-├── detect.py          # Day 1-2: YOLOv8 detection
-├── track.py           # Day 2: DeepSORT tracking  
-├── agent.py           # Day 3: Rule-based decision
-├── sim.py             # Day 4-5: PyBullet simulation
-├── main.py            # Day 6: Integrated pipeline
-├── pointcloud_demo.py # Day 2: Open3D basics (optional but recommended)
+
+```text
+embodied-ai-demo/
+├── data/
+│   ├── test.mp4
+│   └── output_machine.mp4
 ├── assets/
-│   └── demo.mp4       # Day 7: Screen recording
+│   ├── tracking_result.png
+│   └── pybullet_gui.png
+├── detect.py
+├── track.py
+├── agent.py
+├── sim.py
+├── main.py
+├── requirements.txt
+├── .gitignore
 └── README.md
+```
 
-## 技术实现
+说明：
+- `detect.py`：目标检测相关逻辑
+- `track.py`：多目标跟踪相关逻辑
+- `agent.py`：规则决策模块
+- `sim.py`：PyBullet 仿真与机械臂动作执行
+- `main.py`：整合后的完整 pipeline
 
-### Day 1-2: 视觉感知模块
-- 使用YOLOv8n（轻量级模型）实现实时物体检测
-- 集成DeepSORT实现跨帧目标关联，为每个目标分配唯一ID
-- 针对CPU环境优化，使用半精度推理和分辨率调整
+---
 
-### Day 3: 决策逻辑
+## 核心功能
+
+### 1. 目标检测
+- 使用 YOLOv8n 进行视频帧级目标检测
+- 输出目标类别、边界框与置信度
+
+### 2. 多目标跟踪
+- 使用 DeepSORT 对目标进行跨帧关联
+- 为检测结果分配 ID，并在输出视频中进行可视化
+
+### 3. 动作决策
+当前版本使用最简单的基于类别的规则决策：
+
 ```python
-# 最简单的Agent决策逻辑，理解VLA架构的基础形式
+# agent.py
+
 def decide_action(objects):
     if "bottle" in objects:
         return "pick_bottle"
-    elif "cup" in objects:
-        return "move_cup"
-    return "idle"
+    elif "person" in objects:
+        return "follow_person"
+    else:
+        return "idle"
 ```
 
-### Day 4-5: 仿真执行
+这样做的目的不是追求复杂策略，而是先验证感知结果能否被顺利转化为动作指令。
 
-- 使用PyBullet搭建仿真环境
-- 加载KUKA iiwa 7自由度机械臂模型
-- 实现基础的关节位置控制，完成简单抓取动作
+### 4. 仿真执行
+- 使用 PyBullet 构建基础场景
+- 加载 KUKA iiwa 机械臂模型
+- 根据动作指令执行预定义的机械臂动作
 
-## Day 6: 系统集成
+目前实现的动作包括：
+- `pick_bottle`
+- `follow_person`
+- `idle`
 
-将上述模块串联，实现：
-视频流 → YOLO检测 → DeepSORT跟踪 → 规则决策 → PyBullet执行
+---
 
+## 运行环境
 
-## Day 7: Open3D基础（延伸学习）
+- Python 3.9
+- PyTorch
+- OpenCV
+- YOLOv8 / Ultralytics
+- DeepSORT Realtime
+- PyBullet
+- NumPy
 
-- 点云数据的读取与可视化
-- 基础下采样和去噪处理
-- 理解3D感知在机器人操作中的作用
+---
 
-## 实验环境
+## 安装方式
 
-- **硬件**：Intel 18核CPU, 32GB内存（无GPU）
-- **软件**：Python 3.9, PyTorch (CPU), OpenCV, PyBullet, Open3D
-
-## 运行方式
+### 1. 创建环境
 
 ```bash
-# 安装依赖
-pip install ultralytics opencv-python torch torchvision
-pip install deep-sort-realtime pybullet open3d
-
-# 运行完整pipeline
-python main.py --input video.mp4
-
-# 单独运行各模块
-python detect.py --source test.jpg    # 检测
-python track.py --source test.mp4     # 跟踪
-python sim.py --action pick_bottle    # 仿真
+conda create -n agent_env python=3.9
+conda activate agent_env
 ```
 
-### 关键学习收获
-工程实践：理解了如何将深度学习模型（YOLO）与传统跟踪算法（DeepSORT）结合
-系统思维：体验了感知-决策-执行闭环的延迟和耦合问题
-仿真基础：掌握了PyBullet的基本使用，理解物理仿真在机器人开发中的重要性
-性能优化：在无GPU环境下，通过降低分辨率和批处理优化推理速度
-局限性与未来探索
-### 当前局限：
-决策模块使用简单规则，未引入LLM/VLM
-仅支持仿真环境，未接入真实机械臂
-3D感知部分仅完成基础点云处理，未实现完整的三维重建
-### 下一步想探索的：
-尝试将决策模块升级为轻量级VLM（如LLaVA）接入
-深入学习3D视觉，尝试用Open3D实现简单的物体位姿估计
-了解Sim-to-Real的基本方法，为后续接触真实机器人做准备
-### 参考资料
-YOLOv8官方文档
-PyBullet Quickstart Guide
-DeepSORT原始论文与实现
-Open3D官方Tutorial
+### 2. 安装依赖
+
+```bash
+pip install ultralytics opencv-python torch torchvision
+pip install deep-sort-realtime
+conda install -c conda-forge pybullet -y
+pip install numpy
+```
+
+### 3. Windows 兼容说明
+
+在部分 Windows 环境下，可能出现 OpenMP 运行库冲突。调试阶段可在 `main.py` 最顶部加入：
+
+```python
+import os
+os.environ["KMP_DUPLICATE_LIB_OK"] = "TRUE"
+```
+
+这只是临时兼容方案，后续可以通过整理环境进一步解决。
+
 ---
-声明：这是一个本科阶段的学习练习项目，旨在通过动手实践理解具身智能的基础流程。代码以可读性和教学性为主，未进行生产级优化。
+
+## 运行方法
+
+### 1. 准备输入视频
+
+将测试视频放在：
+
+```text
+data/test.mp4
+```
+
+当前 demo 更适合使用包含明显 `bottle` 或 `person` 的短视频。
+
+### 2. 运行主程序
+
+```bash
+python main.py
+```
+
+### 3. 输出结果
+
+程序运行后会：
+- 打开 PyBullet GUI 窗口
+- 执行对应机械臂动作
+- 保存结果视频到：
+
+```text
+data/output_machine.mp4
+```
+
+---
+
+## 当前成果
+
+这个项目目前已经实现：
+
+- 视频目标检测
+- 多目标跟踪与 ID 标注
+- 基于规则的动作生成
+- PyBullet 机械臂动作执行
+- 从视觉输入到动作执行的最小闭环验证
+
+从工程角度看，它已经是一个可以展示的最小具身智能 demo。
+
+---
+
+## 局限性
+
+当前版本仍然比较基础，主要局限包括：
+
+- 只使用 RGB 视频输入，没有引入深度信息
+- 决策模块是规则驱动的，不具备学习能力
+- 机械臂动作是预定义脚本，不是真正的抓取规划
+- 没有接入真实机器人硬件
+- 还没有加入三维场景建模、点云处理或世界模型模块
+
+这些限制也是这个项目后续继续扩展的空间所在。
+
+---
+
+## 后续可以继续探索的方向
+
+下面这些方向都可以自然地接在当前项目之后：
+
+### 1. 更丰富的感知输入
+可以尝试从纯 RGB 输入扩展到 RGB-D、深度图或其他更具有空间信息的输入形式，让动作决策更贴近真实场景。
+
+### 2. 从规则到可学习策略
+当前动作模块是规则驱动的，后续可以尝试使用简单的神经网络或 imitation learning 方法，让系统从“手写规则”逐渐过渡到“学习策略”。
+
+### 3. 更真实的机械臂控制
+目前的仿真执行以预定义动作为主，后续可以进一步了解逆运动学、轨迹规划和更细致的操作控制方式。
+
+### 4. 更完整的任务设置
+现在的任务更多是类别到动作的映射，未来可以考虑更长时序、更复杂交互、更明确任务目标的 embodied setup。
+
+### 5. 更模块化的实验框架
+当前项目已经具有基本模块化结构，后续可以进一步整理成更适合实验对比和持续迭代的代码框架。
+
+---
+
+## 项目价值
+
+这个项目的价值不在于复杂度，而在于它把几个原本分散的部分真正串起来了：
+
+- 视觉模型输出
+- 时序目标关联
+- 动作选择
+- 仿真执行
+
+它证明了一条最基础的具身智能链路是可以被独立搭建和验证的，也为继续深入学习机器人感知、动作生成和仿真控制提供了一个清晰起点。
+
+---
+
+## 备注
+
+这是一个以学习和工程实践为主的项目，重点是把最小系统跑通、理清模块之间的关系，并形成可展示、可复现、可继续扩展的基础版本。
