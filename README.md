@@ -40,7 +40,7 @@ PyBullet Robot Execution
 ```text
 embodied-ai-demo/
 ├── data/
-│   ├── test.mp4
+│   ├── test——bottle.mp4
 │   └── output_machine.mp4
 ├── assets/
 │   ├── tracking_result.png
