@@ -98,7 +98,6 @@ def decide_action(objects):
 
 目前实现的动作包括：
 - `pick_bottle`
-- `follow_person`
 - `idle`
 
 ---
@@ -155,7 +154,7 @@ os.environ["KMP_DUPLICATE_LIB_OK"] = "TRUE"
 data/test.mp4
 ```
 
-当前 demo 更适合使用包含明显 `bottle` 或 `person` 的短视频。
+模型简单,当前 demo 更适合使用包含明显 `bottle` 或 `person` 的短视频。
 
 ### 2. 运行主程序
 
